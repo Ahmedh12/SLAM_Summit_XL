@@ -1,0 +1,3 @@
+<launch>
+<node pkg="motion_pkg" type="motion.py" name="motion"></node>
+</launch>
