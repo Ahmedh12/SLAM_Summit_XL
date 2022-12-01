@@ -1,3 +1,4 @@
 <launch>
-<node pkg="motion_pkg" type="motion.py" name="motion"></node>
+<node pkg="motion_pkg" type="motion.py" name="motion_control"></node>
+<node pkg="sensor_alignment_pkg" type="sensor.py" name="sensor_readings" output="screen"></node>
 </launch>
