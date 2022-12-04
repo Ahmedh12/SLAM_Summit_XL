@@ -19,10 +19,10 @@ def motionKeysPressed(key):
         elif char == 's' or char == 'S':
             msg.linear.x = -velocity
             pub.publish(msg)
-        elif char == 'a' or char == 'A':
+        elif char == 'd' or char == 'D':
             msg.angular.z = velocity
             pub.publish(msg)
-        elif char == 'd' or char == 'D':
+        elif char == 'a' or char == 'A':
             msg.angular.z = -velocity
             pub.publish(msg)
         else:

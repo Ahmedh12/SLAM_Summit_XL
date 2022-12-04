@@ -21,16 +21,29 @@ pub = rospy.Publisher("sensor_readings",Readings,queue_size=10)
 
 def OnDataRecieved(frontLaser,rearLaser,odometry):
     #TODO : Fill Readings Message with the appropriate data from Sensor Reading and Odometry 
-    #We can Eding msg/Readings.msg if necessary
+    #We can Edit msg/Readings.msg if necessary
 
+    #Sensor Model Readings
     msg = Readings()
+    msg.start_angle = frontLaser.angle_min
+    msg.angle_increment = frontLaser.angle_increment
+    msg.range_min = frontLaser.range_min
+    msg.range_max = frontLaser.range_max
+
+    #all front laser beams plus (310->490) rays from rear laser
+    temp_beams_list = list(frontLaser.ranges)
+    temp_beams_list.extend(list(rearLaser.ranges)[310:490:1])
+    msg.ranges = tuple(temp_beams_list)
+
+    #Motion Model Readings:
+    msg.pose = odometry.pose
+
     pub.publish(msg)
     
 
 def main():
     #intializing Node
     rospy.init_node('sensors_data')
-    first = True
     #subscribing to sensor data topics
     front_laser_sub = message_filters.Subscriber('/robot/front_laser/scan',LaserScan)
     rear_laser_sub = message_filters.Subscriber('/robot/rear_laser/scan',LaserScan)
