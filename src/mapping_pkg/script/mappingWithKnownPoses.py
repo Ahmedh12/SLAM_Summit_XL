@@ -39,7 +39,8 @@ def euler_from_quaternion(x, y, z, w):
 Assumptions:
 1- Assume msg.pose is the pose of the robot at the time of the sensor reading relative to the real world frame
 '''
-#TODO: Implement the mapping algorithm Given the sensor readings and the odometry data in the Readings message
+#TODO: Fix mapping Fuction to correctly map to grid cells , currently it maps to the wrong cells
+#TODO: Adjust mapping function to fill un occupied cells with 0
 
 
 
