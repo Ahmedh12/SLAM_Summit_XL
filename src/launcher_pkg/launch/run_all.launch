@@ -1,4 +1,5 @@
 <launch>
 <node pkg="motion_pkg" type="motion.py" name="motion_control"></node>
-<node pkg="sensor_alignment_pkg" type="sensor.py" name="sensor_readings" output="screen"></node>
+<node pkg="mapping_pkg" type="sensorAlignment.py" name="sensor_readings" output="screen"></node>
+<node pkg="mapping_pkg" type="mappingWithKnownPoses.py" name="Mapping" output="screen"></node>
 </launch>

@@ -4,7 +4,7 @@ from rospy.rostime import Time
 import message_filters
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
-from sensor_alignment_pkg.msg import Readings
+from mapping_pkg.msg import Readings
 
 '''
 /robot/front_laser/scan Type: sensor_msgs/LaserScan 
@@ -20,9 +20,6 @@ from sensor_alignment_pkg.msg import Readings
 pub = rospy.Publisher("sensor_readings",Readings,queue_size=10)
 
 def OnDataRecieved(frontLaser,rearLaser,odometry):
-    #TODO : Fill Readings Message with the appropriate data from Sensor Reading and Odometry 
-    #We can Edit msg/Readings.msg if necessary
-
     #Sensor Model Readings
     msg = Readings()
     msg.start_angle = frontLaser.angle_min

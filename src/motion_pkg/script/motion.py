@@ -26,7 +26,7 @@ def motionKeysPressed(key):
             msg.angular.z = -velocity
             pub.publish(msg)
         else:
-            print("nothing from press")
+            pass
     except AttributeError:
         pass
 
@@ -42,7 +42,7 @@ def motionKeysReleased(key):
         elif char == 'd' or char == 'D':
             rospy.Timer(rospy.Duration(1.0),stopRobot,oneshot=True)
         else:
-            print("nothing from release")
+            pass
     except AttributeError:
         pass
 
@@ -55,7 +55,6 @@ def stopRobot(e):
     
 
 def main():
-    start_time = Time.now().to_sec()
     listner =Listener(on_press=motionKeysPressed,
                       on_release=motionKeysReleased)
     listner.start()
