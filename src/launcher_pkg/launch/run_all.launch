@@ -2,4 +2,5 @@
 <node pkg="motion_pkg" type="motion.py" name="motion_control"></node>
 <node pkg="mapping_pkg" type="sensorAlignment.py" name="sensor_readings" output="screen"></node>
 <node pkg="mapping_pkg" type="mappingWithKnownPoses.py" name="Mapping" output="screen"></node>
+<!-- <node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 map odom 30" /> -->
 </launch>
