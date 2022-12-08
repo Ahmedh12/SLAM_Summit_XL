@@ -47,8 +47,8 @@ Assumptions:
 def computeOccupancy(SensorReading):
     
     #Robot Pose
-    x = SensorReading.pose.pose.position.x
-    y = SensorReading.pose.pose.position.y
+    x = SensorReading.pose.pose.position.x 
+    y = SensorReading.pose.pose.position.y 
     theta = euler_from_quaternion(SensorReading.pose.pose.orientation.x,SensorReading.pose.pose.orientation.y,SensorReading.pose.pose.orientation.z,SensorReading.pose.pose.orientation.w)[2]
     Robotpose = [x,y,theta]
 
@@ -60,12 +60,19 @@ def computeOccupancy(SensorReading):
             #Compute the end point of the ray 
             ray_angle = SensorReading.start_angle + (SensorReading.angle_increment*i) + Robotpose[2] + (3*math.pi/4)
 
-            x = SensorReading.ranges[i]*math.cos(ray_angle)+Robotpose[0]
+            x = SensorReading.ranges[i]*math.cos(ray_angle)+Robotpose[0]   
             y = SensorReading.ranges[i]*math.sin(ray_angle)+Robotpose[1]
+
             #Mark the cell as occupied
             cells[int((x+50)/0.02),int((y+50)/0.02)] = 100
     
-    #mark the cells that are in the sensor range as free if not occupied
+            #mark the cells that are in the sensor range as free if not occupied
+            step_size = SensorReading.ranges[i]/50
+            for j in range(50):
+                x = step_size*j*math.cos(ray_angle)+Robotpose[0]
+                y = step_size*j*math.sin(ray_angle)+Robotpose[1]
+                if cells[int((x+50)/0.02),int((y+50)/0.02)] != 100:
+                    cells[int((x+50)/0.02),int((y+50)/0.02)] = 0 
 
 
 
@@ -98,7 +105,7 @@ def main():
     rospy.init_node('Mapping')
     
     #publish The map data to the topic map_data
-    pub = rospy.Publisher("map_data",OccupancyGrid,queue_size= 1)
+    pub = rospy.Publisher("map_data",OccupancyGrid,queue_size= 10)
 
     #subscribe to the aligned Sensor Readings topic
     rospy.Subscriber("/sensor_readings" , Readings , onDataRecived , (pub))
