@@ -44,7 +44,7 @@ def OnDataRecieved(frontLaser,rearLaser,odometry):
     global start_time , pub
     
     wait = end_time - start_time
-    if(wait.secs > 0.5):
+    if(wait.secs > 2):
         start_time = rospy.Time.now()
         pub.publish(msg)
     

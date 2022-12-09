@@ -34,11 +34,11 @@ def getGlobalCoords(x,y,transform , robot_pose):
 
 
 def inMap(x,y):
-    # if x >= 0 and x <= 4992 and y >= 0 and y <= 4992:
-    #     return True
-    # else:
-    #     return False
-    return True
+    if x >= -50 and x <= 4942 and y >= -50 and y <= 4942:
+        return True
+    else:
+        return False
+    # return True
 
 
 def followRays(Robotpose,ranges , range_max , range_min , start_angle , angle_increment , transform):
