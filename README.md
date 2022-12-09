@@ -10,3 +10,19 @@
     catkin_make
     roslaunch launcher_pkg run_all.launch
  ```
+
+ ## ScreenShots
+
+### Real Map
+![Real Map](imgs/Map.png)
+
+### partially Generated Map 
+![Our Map](imgs/ourMap.png)
+
+## Contributors
+
+- [@Ahmed Hussien](https://www.github.com/Ahmedh12)
+- [@Millania Sameh](https://www.github.com/millaniaSameh)
+- [@Nada Abdelrahman](https://www.github.com/nadaabdelgayed)
+- [@Nouran Shawky]()
+
