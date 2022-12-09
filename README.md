@@ -5,6 +5,8 @@
 ```bash
     roslaunch summit_xl_sim_bringup summit_xls_complete.launch
 ```
-- Then In another Terminal Window run our modules
+- Then In the project folder open a terminal and run
 ```bash
-    roslaunch launch_pkg run_all.launch
+    catkin_make
+    roslaunch launcher_pkg run_all.launch
+ ```
