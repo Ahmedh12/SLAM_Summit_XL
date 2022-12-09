@@ -21,8 +21,8 @@
 
 ## Contributors
 
-- [@Ahmed Hussien](https://www.github.com/Ahmedh12)
-- [@Millania Sameh](https://www.github.com/millaniaSameh)
-- [@Nada Abdelrahman](https://www.github.com/nadaabdelgayed)
-- [@Nouran Shawky]()
+- [Ahmed Hussien](https://www.github.com/Ahmedh12)
+- [Millania Sameh](https://www.github.com/millaniaSameh)
+- [Nada Abdelrahman](https://www.github.com/nadaabdelgayed)
+- [Nouran Shawky]()
 
