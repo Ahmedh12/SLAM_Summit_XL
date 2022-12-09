@@ -42,7 +42,7 @@ def OnDataRecieved(frontLaser,rearLaser,odometry):
     global pub
     
     wait = end_time - start_time
-    if(wait.secs > 3):
+    if(wait.secs > 0.5):
         print("Sent: "+str(odometry.pose.pose.position.x))
         start_time = rospy.Time.now()
         pub.publish(msg)
@@ -61,7 +61,7 @@ def main():
     
 
     #Aligning Sensor data
-    ts = message_filters.ApproximateTimeSynchronizer([front_laser_sub, rear_laser_sub,odometry_sub],1,1,allow_headerless=False,reset=True)
+    ts = message_filters.ApproximateTimeSynchronizer([front_laser_sub, rear_laser_sub,odometry_sub],10,0.1,allow_headerless=False,reset=True)
     ts.registerCallback(OnDataRecieved)
 
     #Publishing Sensor data

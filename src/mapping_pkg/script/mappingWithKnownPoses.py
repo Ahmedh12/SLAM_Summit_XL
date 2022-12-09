@@ -45,6 +45,7 @@ Assumptions:
 
 
 def computeOccupancy(SensorReading):
+    global si , fr
     
     #Robot Pose
     x = SensorReading.pose.pose.position.x 
@@ -62,6 +63,9 @@ def computeOccupancy(SensorReading):
 
             x = SensorReading.ranges[i]*math.cos(ray_angle)+Robotpose[0]   
             y = SensorReading.ranges[i]*math.sin(ray_angle)+Robotpose[1]
+
+            
+            # print("RayLength : " + str(SensorReading.ranges[400]) + " X: " + str(int((x+50)/0.02)) + " Y: " + str(int((y+50)/0.02)) + " Ray Angle: " + str(ray_angle))
 
             #Mark the cell as occupied
             cells[int((x+50)/0.02),int((y+50)/0.02)] = 100
@@ -98,7 +102,7 @@ def onDataRecived(msg , pub):
     map.data = tuple(cells.flatten())
 
     pub.publish(map)
-    # print("Published map")
+
 
 def main():
     #intializing Node
@@ -108,7 +112,11 @@ def main():
     pub = rospy.Publisher("map_data",OccupancyGrid,queue_size= 10)
 
     #subscribe to the aligned Sensor Readings topic
-    rospy.Subscriber("/sensor_readings" , Readings , onDataRecived , (pub))
+    rospy.Subscriber(name = "/sensor_readings" ,
+                    data_class= Readings ,  
+                    callback= onDataRecived ,
+                    callback_args=(pub),
+                    queue_size= 1)
 
     while not rospy.is_shutdown():
         pass
