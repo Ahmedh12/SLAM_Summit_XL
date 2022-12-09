@@ -11,8 +11,45 @@
     roslaunch launcher_pkg run_all.launch
  ```
 
- ## ScreenShots
+## Directory Structure
+```bash
+.
+├── build
+├── Cognitive Robotics - Project document  .pdf
+├── frames.pdf
+├── imgs
+│   ├── Map.png
+│   └── ourMap.png
+├── README.md
+└── src
+    ├── CMakeLists.txt
+    ├── launcher_pkg
+    │   ├── CMakeLists.txt
+    │   ├── launch
+    │   │   └── run_all.launch
+    │   └── package.xml
+    ├── mapping_pkg
+    │   ├── CMakeLists.txt
+    │   ├── msg
+    │   │   └── Readings.msg
+    │   ├── package.xml
+    │   ├── script
+    │   │   ├── mappingWithKnownPoses.py
+    │   │   ├── __pycache__
+    │   │   ├── sensorAlignment.py
+    │   │   └── utils.py
+    │   └── src
+    └── motion_pkg
+        ├── CMakeLists.txt
+        ├── package.xml
+        ├── script
+        │   └── motion.py
+        └── src
 
+```
+
+
+ ## ScreenShots
 ### Real Map
 ![Real Map](imgs/Map.png)
 
