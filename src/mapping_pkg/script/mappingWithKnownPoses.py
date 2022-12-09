@@ -3,37 +3,12 @@ import rospy
 import numpy as np
 from mapping_pkg.msg import Readings
 from nav_msgs.msg import OccupancyGrid
+
+from utils import euler_from_quaternion , FLTM , RLTM ,Transformation
+
 import math
- 
-#Global Variables
-cells = np.ones((4992,4992),dtype=np.int8)
-cells = cells * -1 # -1 means unknown, 0 means free, 100 means occupied
-resolution = 0.02 #meters
 
-
-def euler_from_quaternion(x, y, z, w):
-        """
-        Convert a quaternion into euler angles (roll, pitch, yaw)
-        roll is rotation around x in radians (counterclockwise)
-        pitch is rotation around y in radians (counterclockwise)
-        yaw is rotation around z in radians (counterclockwise)
-        """
-        t0 = +2.0 * (w * x + y * z)
-        t1 = +1.0 - 2.0 * (x * x + y * y)
-        roll_x = math.atan2(t0, t1)
-     
-        t2 = +2.0 * (w * y - z * x)
-        t2 = +1.0 if t2 > +1.0 else t2
-        t2 = -1.0 if t2 < -1.0 else t2
-        pitch_y = math.asin(t2)
-     
-        t3 = +2.0 * (w * z + x * y)
-        t4 = +1.0 - 2.0 * (y * y + z * z)
-        yaw_z = math.atan2(t3, t4)
-     
-        return roll_x, pitch_y, yaw_z # in radians
-
-
+import tf
 
 '''
 Assumptions:
@@ -42,41 +17,71 @@ Assumptions:
 #TODO: Fix mapping Fuction to correctly map to grid cells , currently it maps to the wrong cells
 #TODO: Adjust mapping function to fill un occupied cells with 0
 
+def getGlobalCoords(x,y,transform , robot_pose):
+    global t
+    #Get the robot pose transformation matrix
+    pos = [robot_pose.position.x,robot_pose.position.y,robot_pose.position.z]
+    rot = [robot_pose.orientation.x,robot_pose.orientation.y, robot_pose.orientation.z,robot_pose.orientation.w]
+    RT = Transformation(parentFrame="" , childFrame="" , pos = pos , rot= rot).transformationMatrix()   
+    temp = np.array([x,y,1,1])
+    temp = np.matmul(transform,temp)
+    temp = np.matmul(t,temp)
+    temp = np.matmul(RT,temp)
+
+    x = temp[1]
+    y = temp[0]
+    return x,y
+
+
+def inMap(x,y):
+    # if x >= 0 and x <= 4992 and y >= 0 and y <= 4992:
+    #     return True
+    # else:
+    #     return False
+    return True
+
+
+def followRays(Robotpose,ranges , range_max , range_min , start_angle , angle_increment , transform):
+    #Check for ray end points to mark cells as occupied
+    for i in range(len(ranges)):
+        if ranges[i] != "NaN" and ranges[i] <= range_max and ranges[i] >= range_min:
+            #Compute the end point of the ray 
+            ray_angle = start_angle + (angle_increment*i)
+
+            x = ranges[i]*math.cos(ray_angle)   
+            y = ranges[i]*math.sin(ray_angle)
+                        
+                        
+            x,y = getGlobalCoords(x,y,transform,Robotpose)
+
+            #Mark the cell as occupied
+            if inMap(x,y):
+                cells[int((x+50)/0.02),int((y+50)/0.02)] = 100
+    
+            #mark the cells that are in the sensor range as free if not occupied
+            step_size = ranges[i]/50
+            for j in range(50):
+                x = step_size*j*math.cos(ray_angle)
+                y = step_size*j*math.sin(ray_angle)
+                x,y = getGlobalCoords(x,y,transform,Robotpose)
+                if inMap(x,y):
+                    if cells[int((x+50)/0.02),int((y+50)/0.02)] != 100:
+                        cells[int((x+50)/0.02),int((y+50)/0.02)] = 0 
 
 
 def computeOccupancy(SensorReading):
-    global si , fr
     
+    global cells , resolution
+
     #Robot Pose
-    x = SensorReading.pose.pose.position.x 
-    y = SensorReading.pose.pose.position.y 
-    theta = euler_from_quaternion(SensorReading.pose.pose.orientation.x,SensorReading.pose.pose.orientation.y,SensorReading.pose.pose.orientation.z,SensorReading.pose.pose.orientation.w)[2]
-    Robotpose = [x,y,theta]
+    Robotpose = SensorReading.pose.pose
 
-    print("Recived: "+str(SensorReading.pose.pose.position.x))
+    #Follow Rays
+    followRays(Robotpose,SensorReading.ranges_front,SensorReading.range_max,SensorReading.range_min,SensorReading.start_angle,SensorReading.angle_increment , FLTM)
+    followRays(Robotpose,SensorReading.ranges_rear,SensorReading.range_max,SensorReading.range_min,SensorReading.start_angle,SensorReading.angle_increment , RLTM)
 
-    #Check for ray end points to mark cells as occupied
-    for i in range(len(SensorReading.ranges)):
-        if SensorReading.ranges[i] != "NaN" and SensorReading.ranges[i] <= SensorReading.range_max and SensorReading.ranges[i] >= SensorReading.range_min:
-            #Compute the end point of the ray 
-            ray_angle = SensorReading.start_angle + (SensorReading.angle_increment*i) + Robotpose[2] + (3*math.pi/4)
 
-            x = SensorReading.ranges[i]*math.cos(ray_angle)+Robotpose[0]   
-            y = SensorReading.ranges[i]*math.sin(ray_angle)+Robotpose[1]
 
-            
-            # print("RayLength : " + str(SensorReading.ranges[400]) + " X: " + str(int((x+50)/0.02)) + " Y: " + str(int((y+50)/0.02)) + " Ray Angle: " + str(ray_angle))
-
-            #Mark the cell as occupied
-            cells[int((x+50)/0.02),int((y+50)/0.02)] = 100
-    
-            #mark the cells that are in the sensor range as free if not occupied
-            step_size = SensorReading.ranges[i]/50
-            for j in range(50):
-                x = step_size*j*math.cos(ray_angle)+Robotpose[0]
-                y = step_size*j*math.sin(ray_angle)+Robotpose[1]
-                if cells[int((x+50)/0.02),int((y+50)/0.02)] != 100:
-                    cells[int((x+50)/0.02),int((y+50)/0.02)] = 0 
 
 
 
@@ -84,8 +89,6 @@ def computeOccupancy(SensorReading):
 
 def onDataRecived(msg , pub):
     map = OccupancyGrid() #map data to be published
-
-    # print(msg.pose.pose.position)
 
     map.header.frame_id = "robot_map"
     map.info.resolution = 0.02
@@ -105,8 +108,17 @@ def onDataRecived(msg , pub):
 
 
 def main():
+
+    global cells , resolution
+    cells = np.ones((4992,4992),dtype=np.int8)
+    cells = cells * -1 # -1 means unknown, 0 means free, 100 means occupied
+    resolution = 0.02 #meters
+    
     #intializing Node
     rospy.init_node('Mapping')
+
+    #initializing transform Listener
+    transform = tf.TransformListener()
     
     #publish The map data to the topic map_data
     pub = rospy.Publisher("map_data",OccupancyGrid,queue_size= 10)
@@ -119,7 +131,13 @@ def main():
                     queue_size= 1)
 
     while not rospy.is_shutdown():
-        pass
+        try:
+            (trans,rot) = transform.lookupTransform("robot_odom","robot_base_footprint",rospy.Time(0))
+            global t
+            t = np.identity(4)
+            t = Transformation(parentFrame="robot_odom",childFrame="robot_base_footprint",pos = trans , rot  = rot).transformationMatrix()
+        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+            continue
 
 if __name__ == '__main__':
     try:
