@@ -4,18 +4,23 @@ import numpy as np
 from mapping_pkg.msg import Readings
 from nav_msgs.msg import OccupancyGrid
 
-from utils import euler_from_quaternion , FLTM , RLTM ,Transformation
+from utils import FLTM , RLTM ,Transformation
 
 import math
 
-import tf
+# import tf
 
 '''
 Assumptions:
 1- Assume msg.pose is the pose of the robot at the time of the sensor reading relative to the real world frame
+2- Assume the Sensor reading are very accurate , so the inverse sensor model is not needed
+3- Assume the prior is uniform
 '''
-#TODO: Fix mapping Fuction to correctly map to grid cells , currently it maps to the wrong cells
-#TODO: Adjust mapping function to fill un occupied cells with 0
+
+'''
+Observations:
+1-The Odom frame drifts a little bit , so the mappping transform is not 100% accurate
+'''
 
 def getGlobalCoords(x,y,transform , robot_pose):
     global t
@@ -25,7 +30,7 @@ def getGlobalCoords(x,y,transform , robot_pose):
     RT = Transformation(parentFrame="" , childFrame="" , pos = pos , rot= rot).transformationMatrix()   
     temp = np.array([x,y,1,1])
     temp = np.matmul(transform,temp)
-    temp = np.matmul(t,temp)
+    #temp = np.matmul(t,temp)
     temp = np.matmul(RT,temp)
 
     x = temp[1]
@@ -66,7 +71,9 @@ def followRays(Robotpose,ranges , range_max , range_min , start_angle , angle_in
                 x,y = getGlobalCoords(x,y,transform,Robotpose)
                 if inMap(x,y):
                     if cells[int((x+50)/0.02),int((y+50)/0.02)] != 100:
-                        cells[int((x+50)/0.02),int((y+50)/0.02)] = 0 
+                        cells[int((x+50)/0.02),int((y+50)/0.02)] = 0
+
+             
 
 
 def computeOccupancy(SensorReading):
@@ -118,7 +125,7 @@ def main():
     rospy.init_node('Mapping')
 
     #initializing transform Listener
-    transform = tf.TransformListener()
+    # transform = tf.TransformListener()
     
     #publish The map data to the topic map_data
     pub = rospy.Publisher("map_data",OccupancyGrid,queue_size= 10)
@@ -131,13 +138,14 @@ def main():
                     queue_size= 1)
 
     while not rospy.is_shutdown():
-        try:
-            (trans,rot) = transform.lookupTransform("robot_odom","robot_base_footprint",rospy.Time(0))
-            global t
-            t = np.identity(4)
-            t = Transformation(parentFrame="robot_odom",childFrame="robot_base_footprint",pos = trans , rot  = rot).transformationMatrix()
-        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-            continue
+        # try:
+        #     (trans,rot) = transform.lookupTransform("robot_odom","robot_base_footprint",rospy.Time(0))
+        #     global t
+        #     t = np.identity(4)
+        #     t = Transformation(parentFrame="robot_odom",childFrame="robot_base_footprint",pos = trans , rot  = rot).transformationMatrix()
+        # except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+        #     continue
+        pass
 
 if __name__ == '__main__':
     try:
