@@ -43,25 +43,19 @@ class Mapping:
                         callback= self._onDataRecived,
                         queue_size= 1)
 
-
-    
-    def getGlobalCoords(self,x,y,transform,robot_pose):
-        #Get the robot pose transformation matrix
-        pos = [robot_pose.position.x,robot_pose.position.y,robot_pose.position.z]
-        rot = [robot_pose.orientation.x,robot_pose.orientation.y, robot_pose.orientation.z,robot_pose.orientation.w]
-        RT = Transformation(parentFrame="" , childFrame="" , pos = pos , rot= rot).transformationMatrix()   
+    def getGlobalCoords(self,x,y,transform):
         temp = np.array([x,y,1,1])
         temp = np.matmul(transform,temp)
-        temp = np.matmul(RT,temp)
+        temp = np.matmul(self.RT,temp)
 
         x = temp[1]
         y = temp[0]
         return x,y
     
-    def getRayCoords(self , range , angle , transform , Robotpose):
+    def getRayCoords(self , range , angle , transform):
         x = range*math.cos(angle)   
         y = range*math.sin(angle)              
-        x,y = self.getGlobalCoords(x,y,transform,Robotpose)
+        x,y = self.getGlobalCoords(x,y,transform)
         offset_x = self.mapMetaData.origin.position.x
         offset_y = self.mapMetaData.origin.position.y
         resolution = self.mapMetaData.resolution
@@ -93,69 +87,66 @@ class Mapping:
         p = self.computeProbability(cell)
         return math.log(p/(1-p))
     
-    def computeCell(self,cell):
-        logOdds = self.computeLogOdds(cell)
-        prob = 1/(1+math.exp(-logOdds))
+    def computeCell(self,val):
+        # logOdds = self.computeLogOdds(cell)
+        prob = 1/(1+math.exp(-val))
         return int(prob*100)
     
-    def followRays(self,Robotpose,ranges , range_max , range_min , start_angle , angle_increment , transform):
+    def followRays(self,ranges , range_max , range_min , start_angle , angle_increment , transform):
         #Check for ray end points to mark cells as occupied
         for i in range(len(ranges)):
             if ranges[i] != "NaN" and ranges[i] <= range_max and ranges[i] >= range_min:
                 #Compute the end point of the ray 
                 ray_angle = start_angle + (angle_increment*i)
-                x,y = self.getRayCoords(ranges[i],ray_angle,transform,Robotpose)
+                x,y = self.getRayCoords(ranges[i],ray_angle,transform)
                 #Mark the cell as occupied
                 if self.inMap(x,y):
-                    # if self.cells[x,y] != -1:
+                    # if self.cells[x,y] != -1 and self.cells[x,y] >90:
                     #     temp = self.computeLogOdds(self.cells[x,y]) + self.computeLogOdds(90)
                     #     self.cells[x,y] = self.computeCell(temp)
                     # else:
-                    #     self.cells[x,y] = 90
+                    #     self.cells[x,y] = self.computeCell(self.computeLogOdds(90))
                     self.cells[x,y] = 100
                 
                 #Mark the cells that are in the sensor range as free if not occupied
                 step_size = ranges[i] * self.mapMetaData.resolution
                 for j in range(int(1/self.mapMetaData.resolution)-1):
-                    x,y = self.getRayCoords(step_size*j,ray_angle,transform,Robotpose)
+                    x,y = self.getRayCoords(step_size*j,ray_angle,transform)
                     if self.inMap(x,y) and self.cells[x,y] != 100:
-                        # if self.cells[x,y] != -1:
+                        # if self.cells[x,y] != -1 and self.cells[x,y] < 90:
                         #     temp = self.computeLogOdds(self.cells[x,y]) + self.computeLogOdds(10)
                         #     self.cells[x,y] = self.computeCell(temp)
                         # else:
-                        #     self.cells[x,y] = 10
+                        #     self.cells[x,y] = self.computeCell(self.computeLogOdds(10))
                         self.cells[x,y] = 0
         
-
     def computeOccupancy(self,SensorReading):
-        #Robot Pose
-        Robotpose = SensorReading.pose.pose
-
-        #Follow Rays
-        self.followRays(Robotpose,
-                        SensorReading.ranges_front,
+        self.followRays(SensorReading.ranges_front,
                         SensorReading.range_max,
                         SensorReading.range_min,
-                        SensorReading.start_angle,
-                        SensorReading.angle_increment, 
+                        SensorReading.start_angle_front,
+                        SensorReading.angle_increment_front, 
                         self.FLTM)
 
-        self.followRays(Robotpose,
-                        SensorReading.ranges_rear,
+        self.followRays(SensorReading.ranges_rear,
                         SensorReading.range_max,
                         SensorReading.range_min,
-                        SensorReading.start_angle,
-                        SensorReading.angle_increment, 
+                        SensorReading.start_angle_rear,
+                        SensorReading.angle_increment_rear, 
                         self.RLTM)
-
 
     def _onDataRecived(self,msg):
         map = OccupancyGrid()
         map.header.frame_id = self.referenceFrame
         map.info = self.mapMetaData
+        #Get the robot pose transformation matrix
+        robot_pose = msg.pose.pose
+        pos = [robot_pose.position.x,robot_pose.position.y,robot_pose.position.z]
+        rot = [robot_pose.orientation.x,robot_pose.orientation.y, robot_pose.orientation.z,robot_pose.orientation.w]
+        self.RT = Transformation(parentFrame="" , childFrame="" , pos = pos , rot= rot).transformationMatrix() 
+        
         self.computeOccupancy(msg)
         map.data = tuple(self.cells.flatten())
-        print(self.cells[self.cells != -1].flatten().shape)
         self.pub.publish(map)
 
 

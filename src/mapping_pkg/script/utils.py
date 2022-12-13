@@ -25,5 +25,3 @@ class Transformation:
         def __str__(self) -> str:
                 return f"matrix: {self.transformationMatrix()}"
 
-
-

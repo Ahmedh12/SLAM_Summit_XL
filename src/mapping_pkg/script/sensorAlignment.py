@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import rospy
-from rospy.rostime import Time
 import message_filters
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
@@ -24,18 +23,17 @@ def OnDataRecieved(frontLaser,rearLaser,odometry):
     msg = Readings()
     msg.header.frame_id = odometry.header.frame_id
 
-    msg.start_angle = frontLaser.angle_min
-    msg.angle_increment = frontLaser.angle_increment
+    msg.start_angle_front = frontLaser.angle_min
+    msg.start_angle_rear = rearLaser.angle_min + (0*rearLaser.angle_increment)
+    msg.angle_increment_front = frontLaser.angle_increment
+    msg.angle_increment_rear = rearLaser.angle_increment
     msg.range_min = frontLaser.range_min
     msg.range_max = frontLaser.range_max
 
 
     #all front laser beams plus (180->360) rays from rear laser
-    msg.ranges_front = frontLaser.ranges
-    msg.ranges_rear = rearLaser.ranges
-    # temp_beams_list = list(frontLaser.ranges)
-    # temp_beams_list.extend(list(rearLaser.ranges)[180:360:1])
-    # msg.ranges_front = tuple(temp_beams_list)
+    msg.ranges_front = frontLaser.ranges[0:540:1]
+    msg.ranges_rear = rearLaser.ranges[0:540:1]
 
     #Motion Model Readings:
     msg.pose = odometry.pose
