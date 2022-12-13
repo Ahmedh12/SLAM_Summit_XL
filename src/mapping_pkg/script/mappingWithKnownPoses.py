@@ -75,22 +75,13 @@ class Mapping:
         else:
             return False
     
-    def computeProbability(self,cell):
-        if cell == -1:
-            return 0.5
-        elif cell == 0:
-            return 0.1
+
+    def computeCellValue(self,cellValue , prob):
+        odds = (prob/1-prob) * 10
+        if cellValue == -1:
+            return odds
         else:
-            return 0.9
-    
-    def computeLogOdds(self,cell):
-        p = self.computeProbability(cell)
-        return math.log(p/(1-p))
-    
-    def computeCell(self,val):
-        # logOdds = self.computeLogOdds(cell)
-        prob = 1/(1+math.exp(-val))
-        return int(prob*100)
+            return ((cellValue/10) * (odds/10))*10
     
     def followRays(self,ranges , range_max , range_min , start_angle , angle_increment , transform):
         #Check for ray end points to mark cells as occupied
@@ -101,24 +92,20 @@ class Mapping:
                 x,y = self.getRayCoords(ranges[i],ray_angle,transform)
                 #Mark the cell as occupied
                 if self.inMap(x,y):
-                    # if self.cells[x,y] != -1 and self.cells[x,y] >90:
-                    #     temp = self.computeLogOdds(self.cells[x,y]) + self.computeLogOdds(90)
-                    #     self.cells[x,y] = self.computeCell(temp)
-                    # else:
-                    #     self.cells[x,y] = self.computeCell(self.computeLogOdds(90))
-                    self.cells[x,y] = 100
+                        if self.cells[x,y] == -1:
+                            self.cells[x,y] = (0.9/0.1)*10
+                        else:
+                            self.cells[x,y] = ((0.9/0.1)*(self.cells[x,y]/10))*10
                 
                 #Mark the cells that are in the sensor range as free if not occupied
                 step_size = ranges[i] * self.mapMetaData.resolution
-                for j in range(int(1/self.mapMetaData.resolution)-1):
+                for j in range(int(1/self.mapMetaData.resolution)):
                     x,y = self.getRayCoords(step_size*j,ray_angle,transform)
                     if self.inMap(x,y) and self.cells[x,y] != 100:
-                        # if self.cells[x,y] != -1 and self.cells[x,y] < 90:
-                        #     temp = self.computeLogOdds(self.cells[x,y]) + self.computeLogOdds(10)
-                        #     self.cells[x,y] = self.computeCell(temp)
-                        # else:
-                        #     self.cells[x,y] = self.computeCell(self.computeLogOdds(10))
-                        self.cells[x,y] = 0
+                        if self.cells[x,y] == -1:
+                            self.cells[x,y] = (0.1/0.9)*10
+                        else:
+                            self.cells[x,y] = ((0.1/0.9)*(self.cells[x,y]/10))*10
         
     def computeOccupancy(self,SensorReading):
         self.followRays(SensorReading.ranges_front,
