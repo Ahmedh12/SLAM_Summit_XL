@@ -12,6 +12,8 @@ class robotMotion:
     rospy.init_node("cust_motion_controller")
     pub = rospy.Publisher("/robot/robotnik_base_control/cmd_vel",Twist,queue_size=10)
     msg = Twist()
+    msg.angular.y = 0
+    msg.angular.x = 0
     velocity_step = 0.1
     def keyPress(self,key):
         # monitoring key presses to capture multiple inputs

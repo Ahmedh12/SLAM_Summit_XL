@@ -42,9 +42,9 @@ def OnDataRecieved(frontLaser,rearLaser,odometry):
     global start_time , pub
     
     wait = end_time - start_time
-    if(wait.secs > 2):
+    if(wait.secs > 0.25):
         start_time = rospy.Time.now()
-        pub.publish(msg)
+        pub.publish(msg)    
     
 
 def main():
@@ -60,7 +60,7 @@ def main():
     odometry_sub = message_filters.Subscriber('/robot/robotnik_base_control/odom',Odometry)
 
     #Aligning Sensor data
-    ts = message_filters.ApproximateTimeSynchronizer([front_laser_sub, rear_laser_sub,odometry_sub],10,0.2,allow_headerless=False)
+    ts = message_filters.ApproximateTimeSynchronizer([front_laser_sub, rear_laser_sub,odometry_sub],1,0.01,allow_headerless=False)
     ts.registerCallback(OnDataRecieved)
 
     #Publishing Sensor data

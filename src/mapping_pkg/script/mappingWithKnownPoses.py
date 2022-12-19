@@ -35,7 +35,7 @@ class Mapping:
         rospy.init_node('Mapping')
         
         #create a publisher to publish the map
-        self.pub = rospy.Publisher(publishTopic,OccupancyGrid,queue_size= 10)
+        self.pub = rospy.Publisher(publishTopic,OccupancyGrid,queue_size= 1)
 
         #subscribe to the aligned Sensor Readings topic
         rospy.Subscriber(name = sensorTopic ,
