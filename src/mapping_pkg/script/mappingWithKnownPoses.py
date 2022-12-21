@@ -3,10 +3,7 @@ import rospy
 import numpy as np
 from mapping_pkg.msg import Readings
 from nav_msgs.msg import OccupancyGrid
-
 from utils import Transformation
-from constants import mapMetaData , RLTM , FLTM
-
 import math
 
 
@@ -23,7 +20,9 @@ Observations:
 '''
 
 class Mapping:
-    def __init__(self ,publishTopic ,RearLaserTransformMatrix , FrontLaserTransformMatrix , mapMetaData , referenceFrame , sensorTopic):
+    def __init__(self ,publishTopic ,RearLaserTransformMatrix , FrontLaserTransformMatrix ,\
+         mapMetaData , referenceFrame , sensorTopic):
+
         self.cells = np.ones((mapMetaData.height,mapMetaData.width),dtype=np.int8)
         self.cells = self.cells * -1 # -1 means unknown, 0 means free, 100 means occupied
         self.referenceFrame = referenceFrame
@@ -75,15 +74,8 @@ class Mapping:
         else:
             return False
     
-
-    def computeCellValue(self,cellValue , prob):
-        odds = (prob/1-prob) * 10
-        if cellValue == -1:
-            return odds
-        else:
-            return ((cellValue/10) * (odds/10))*10
-    
-    def followRays(self,ranges , range_max , range_min , start_angle , angle_increment , transform):
+    def followRays(self,ranges , range_max , range_min , start_angle ,\
+         angle_increment , transform):
         #Check for ray end points to mark cells as occupied
         for i in range(len(ranges)):
             if ranges[i] != "NaN" and ranges[i] <= range_max and ranges[i] >= range_min:
@@ -99,9 +91,9 @@ class Mapping:
                 
                 #Mark the cells that are in the sensor range as free if not occupied
                 step_size = ranges[i] * self.mapMetaData.resolution
-                for j in range(int(1/self.mapMetaData.resolution)):
+                for j in range(int(1/self.mapMetaData.resolution)-1):
                     x,y = self.getRayCoords(step_size*j,ray_angle,transform)
-                    if self.inMap(x,y) and self.cells[x,y] != 100:
+                    if self.inMap(x,y):
                         if self.cells[x,y] == -1:
                             self.cells[x,y] = (0.1/0.9)*10
                         else:
@@ -135,22 +127,3 @@ class Mapping:
         self.computeOccupancy(msg)
         map.data = tuple(self.cells.flatten())
         self.pub.publish(map)
-
-
-
-def main():
-    Mapping(publishTopic= "map_data",
-            RearLaserTransformMatrix= RLTM,
-            FrontLaserTransformMatrix= FLTM,
-            mapMetaData= mapMetaData,
-            referenceFrame= "robot_map",
-            sensorTopic= "/sensor_readings")
-
-    while not rospy.is_shutdown():
-        pass
-
-if __name__ == '__main__':
-    try:
-        main()
-    except rospy.ROSInterruptException:
-        pass

@@ -8,6 +8,7 @@
 - Then In the project folder open a terminal and run
 ```bash
     catkin_make
+    source ./devel/setup.bash
     roslaunch launcher_pkg run_all.launch
  ```
 
