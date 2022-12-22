@@ -50,3 +50,21 @@ BaseLinkToBaseFrame = Transformation( parentFrame="robot_base_footprint",
 
 RLTM = BaseLinkToBaseFrame.transformationMatrix() @ RearLaser[1].transformationMatrix() @ RearLaser[0].transformationMatrix() 
 FLTM = BaseLinkToBaseFrame.transformationMatrix() @ FrontLaser[1].transformationMatrix() @ FrontLaser[0].transformationMatrix()
+
+#motion Noise parameters
+motionNoise = {}
+motionNoise['alpha1'] = 0.1
+motionNoise['alpha2'] = 0.1
+motionNoise['alpha3'] = 0.1
+motionNoise['alpha4'] = 0.1
+
+#Sensor Model parameters
+SensorModelParams = {}
+SensorModelParams['z_hit'] = 0.85
+SensorModelParams['z_short'] = 0.025
+SensorModelParams['z_max'] = 0.025
+SensorModelParams['z_rand'] = 0.1
+SensorModelParams['sigma_hit'] = 0.1
+SensorModelParams['lambda_short'] = 0.1
+SensorModelParams['laser_max_range'] = 30
+SensorModelParams['laser_min_range'] = 0.1

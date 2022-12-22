@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-from mappingWithKnownPoses import Mapping
+from mapPublisher import MapPublisher
 import rospy
 from constants import mapMetaData , RLTM , FLTM
 
 def main():
-    Mapping(publishTopic= "map_data",
+    MapPublisher(publishTopic= "map_data",
             RearLaserTransformMatrix= RLTM,
             FrontLaserTransformMatrix= FLTM,
             mapMetaData= mapMetaData,

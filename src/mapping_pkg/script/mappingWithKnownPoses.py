@@ -19,8 +19,8 @@ Observations:
 1-The Odom frame drifts a little bit , so the mappping transform is not 100% accurate
 '''
 
-class Mapping:
-    def __init__(self ,publishTopic ,RearLaserTransformMatrix , FrontLaserTransformMatrix ,\
+class Mapper:
+    def __init__(self  ,RearLaserTransformMatrix , FrontLaserTransformMatrix ,\
          mapMetaData , referenceFrame , sensorTopic):
 
         self.cells = np.ones((mapMetaData.height,mapMetaData.width),dtype=np.int8)
@@ -29,12 +29,6 @@ class Mapping:
         self.FLTM = FrontLaserTransformMatrix
         self.RLTM = RearLaserTransformMatrix
         self.mapMetaData = mapMetaData
-
-        #intializing Node
-        rospy.init_node('Mapping')
-        
-        #create a publisher to publish the map
-        self.pub = rospy.Publisher(publishTopic,OccupancyGrid,queue_size= 1)
 
         #subscribe to the aligned Sensor Readings topic
         rospy.Subscriber(name = sensorTopic ,
@@ -118,10 +112,10 @@ class Mapping:
         map = OccupancyGrid()
         map.header.frame_id = self.referenceFrame
         map.info = self.mapMetaData
-        #Get the robot pose transformation matrix
-        robot_pose = msg.pose.pose
-        pos = [robot_pose.position.x,robot_pose.position.y,robot_pose.position.z]
-        rot = [robot_pose.orientation.x,robot_pose.orientation.y, robot_pose.orientation.z,robot_pose.orientation.w]
+        robot_odom = msg.pose.pose
+        #Get the robot odom transformation matrix
+        pos = [robot_odom.position.x,robot_odom.position.y,robot_odom.position.z]
+        rot = [robot_odom.orientation.x,robot_odom.orientation.y, robot_odom.orientation.z,robot_odom.orientation.w]
         self.RT = Transformation(parentFrame="" , childFrame="" , pos = pos , rot= rot).transformationMatrix() 
         
         self.computeOccupancy(msg)

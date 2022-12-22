@@ -25,3 +25,12 @@ class Transformation:
         def __str__(self) -> str:
                 return f"matrix: {self.transformationMatrix()}"
 
+
+def sample(mean, cov,type = 'gaussian', state = 'univariate'):
+        if type == 'gaussian':
+                if state == 'multivariate':
+                        return np.random.multivariate_normal(mean, cov)
+                elif state == 'univariate':
+                        return np.random.normal(mean, cov)
+        elif type == 'triangular':
+                return np.random.triangular(mean, cov)
