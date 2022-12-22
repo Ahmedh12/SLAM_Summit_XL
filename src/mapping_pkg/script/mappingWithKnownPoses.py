@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-import rospy
 import numpy as np
-from mapping_pkg.msg import Readings
-from nav_msgs.msg import OccupancyGrid
 from utils import Transformation
 import math
 
@@ -20,35 +17,33 @@ Observations:
 '''
 
 class Mapper:
-    def __init__(self  ,RearLaserTransformMatrix , FrontLaserTransformMatrix ,\
-         mapMetaData , referenceFrame , sensorTopic):
+    def __init__(self  ,RearLaserTransformMatrix , FrontLaserTransformMatrix , mapMetaData):
 
         self.cells = np.ones((mapMetaData.height,mapMetaData.width),dtype=np.int8)
         self.cells = self.cells * -1 # -1 means unknown, 0 means free, 100 means occupied
-        self.referenceFrame = referenceFrame
         self.FLTM = FrontLaserTransformMatrix
         self.RLTM = RearLaserTransformMatrix
         self.mapMetaData = mapMetaData
 
-        #subscribe to the aligned Sensor Readings topic
-        rospy.Subscriber(name = sensorTopic ,
-                        data_class= Readings ,  
-                        callback= self._onDataRecived,
-                        queue_size= 1)
-
-    def getGlobalCoords(self,x,y,transform):
+    def getGlobalCoords(self,x,y,transform , toOdomTransform = None):
         temp = np.array([x,y,1,1])
         temp = np.matmul(transform,temp)
-        temp = np.matmul(self.RT,temp)
+        if toOdomTransform is None:
+            temp = np.matmul(self.RT,temp)
+        else:
+            temp = np.matmul(toOdomTransform,temp)
 
         x = temp[1]
         y = temp[0]
         return x,y
     
-    def getRayCoords(self , range , angle , transform):
+    def getRayCoords(self , range , angle , transform , toOdomTransform = None):
         x = range*math.cos(angle)   
         y = range*math.sin(angle)              
-        x,y = self.getGlobalCoords(x,y,transform)
+        if toOdomTransform is None:
+            x,y = self.getGlobalCoords(x,y,transform)
+        else:
+            x,y = self.getGlobalCoords(x,y,transform,toOdomTransform)
         offset_x = self.mapMetaData.origin.position.x
         offset_y = self.mapMetaData.origin.position.y
         resolution = self.mapMetaData.resolution
@@ -107,17 +102,26 @@ class Mapper:
                         SensorReading.start_angle_rear,
                         SensorReading.angle_increment_rear, 
                         self.RLTM)
-
-    def _onDataRecived(self,msg):
-        map = OccupancyGrid()
-        map.header.frame_id = self.referenceFrame
-        map.info = self.mapMetaData
-        robot_odom = msg.pose.pose
+    
+    def ray_casting(self, x_t , rayIdx , max_range , transform):
+        '''
+        Retrurns the length of the ray casted at the given pose and ray index
+        x_t : the pose of the robot at time t in the odom frame
+        rayIdx : the index of the ray to be casted
+        '''
         #Get the robot odom transformation matrix
-        pos = [robot_odom.position.x,robot_odom.position.y,robot_odom.position.z]
-        rot = [robot_odom.orientation.x,robot_odom.orientation.y, robot_odom.orientation.z,robot_odom.orientation.w]
-        self.RT = Transformation(parentFrame="" , childFrame="" , pos = pos , rot= rot).transformationMatrix() 
+        pos = [x_t.position.x,x_t.position.y,x_t.position.z]
+        rot = [x_t.orientation.x,x_t.orientation.y, x_t.orientation.z,x_t.orientation.w]
+        RT = Transformation(parentFrame="" , childFrame="" , pos = pos , rot= rot).transformationMatrix()
+        #cast the ray
+        step_size = max_range * self.mapMetaData.resolution
+        for j in range(int(1/self.mapMetaData.resolution)):
+            x,y = self.getRayCoords(step_size*j,rayIdx,transform,RT)
+            if self.inMap(x,y) and self.cells[x,y] >= 60:
+                break
+            
+        #Compute the length of the ray                
+        ray_length = math.sqrt((x-x_t.position.x)**2 + (y-x_t.position.y)**2)
         
-        self.computeOccupancy(msg)
-        map.data = tuple(self.cells.flatten())
-        self.pub.publish(map)
+        return ray_length
+
