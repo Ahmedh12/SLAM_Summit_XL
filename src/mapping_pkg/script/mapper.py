@@ -4,6 +4,7 @@ from utils import Transformation , normalize_angle
 import math
 
 
+
 '''
 Assumptions:
 1- Assume msg.pose is the pose of the robot at the time of the sensor reading relative to the real world frame
@@ -140,3 +141,17 @@ class Mapper:
         
         return ray_length * self.mapMetaData.resolution
 
+
+    def generateRandomPose(self):
+        '''
+        Generates a random pose in the map
+        '''
+        #Generate a random pose in the map
+        x_lower = self.mapMetaData.origin.position.x / self.mapMetaData.resolution
+        x_upper = (self.mapMetaData.origin.position.x / self.mapMetaData.resolution)  + self.mapMetaData.width
+        y_lower = self.mapMetaData.origin.position.y / self.mapMetaData.resolution
+        y_upper = (self.mapMetaData.origin.position.y / self.mapMetaData.resolution)  + self.mapMetaData.height
+        x = np.random.uniform(x_lower,x_upper)
+        y = np.random.uniform(y_lower,y_upper)
+        theta = np.random.uniform(-math.pi,math.pi)
+        return x,y,theta
