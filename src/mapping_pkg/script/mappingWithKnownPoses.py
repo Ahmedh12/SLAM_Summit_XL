@@ -130,9 +130,9 @@ class Mapper:
             x_map = int((x_t.position.y - self.mapMetaData.origin.position.y) / self.mapMetaData.resolution)
 
             if self.inMap(x,y) and self.cells[x,y] == 100:
-                print("hit")
-                print("pose in map",str(x_map),str(y_map),sep=",")
-                print("grid",str(x),str(y) , sep=",")
+                # print("hit")
+                # print("pose in map",str(x_map),str(y_map),sep=",")
+                # print("grid",str(x),str(y) , sep=",")
                 break
 
         #Compute the length of the ray                

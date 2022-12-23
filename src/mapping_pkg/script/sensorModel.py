@@ -102,7 +102,7 @@ class SensorModel:
             # compute the expected measurement
             if z[i] != "inf" and z[i] > self.laser_min_range and z[i] < self.laser_max_range:
                 z_t = self._expected_measurement(x_t, i , z[i] , is_front_laser)
-                print("expected: " , z_t , "  actual: " , z[i])
+                # print("expected: " , z_t , "  actual: " , z[i])
                 q += self._p_z(z[i], z_t)
         return q
 

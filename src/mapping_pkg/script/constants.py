@@ -48,15 +48,16 @@ BaseLinkToBaseFrame = Transformation( parentFrame="robot_base_footprint",
                                       rot = [0.0,0.0,0.0,1.0])
 
 
+#Transformation Matrices for the static transformations of laser sensors
 RLTM = BaseLinkToBaseFrame.transformationMatrix() @ RearLaser[1].transformationMatrix() @ RearLaser[0].transformationMatrix() 
 FLTM = BaseLinkToBaseFrame.transformationMatrix() @ FrontLaser[1].transformationMatrix() @ FrontLaser[0].transformationMatrix()
 
 #motion Noise parameters
 motionNoise = {}
-motionNoise['alpha1'] = 0.1
-motionNoise['alpha2'] = 0.1
-motionNoise['alpha3'] = 0.1
-motionNoise['alpha4'] = 0.1
+motionNoise['alpha1'] = 0.01
+motionNoise['alpha2'] = 0.01
+motionNoise['alpha3'] = 0.001
+motionNoise['alpha4'] = 0.001
 
 #Sensor Model parameters
 SensorModelParams = {}
