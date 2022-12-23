@@ -1,4 +1,4 @@
-from mappingWithKnownPoses import Mapper
+from mapper import Mapper
 from nav_msgs.msg import OccupancyGrid
 from mapping_pkg.msg import Readings
 from utils import Transformation

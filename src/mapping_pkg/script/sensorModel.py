@@ -1,6 +1,6 @@
 import numpy as np
 from math import atan2, cos, sin, sqrt, pi
-from mappingWithKnownPoses import Mapper
+from mapper import Mapper
 from constants import RLTM , FLTM , mapMetaData
 
 class SensorModel:
