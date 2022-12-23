@@ -60,6 +60,8 @@ class particleFilter:
         self.weights = [w / accum for w in self.weights]
         self.pose = max(self.particles , key = lambda p : p.weight).pose
         # print("best pose: " , str(self.pose) , "weight: " , str(max(self.particles , key = lambda p : p.weight).weight))
+        #TODO:
+        self.pose = self.particles[0].curr_odom_pose
         # self.mapPublisher.cells = max(self.particles , key = lambda p : p.weight).mapper.cells
 
 
