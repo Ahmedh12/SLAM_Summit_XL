@@ -5,7 +5,7 @@ from constants import RLTM , FLTM , mapMetaData
 
 class SensorModel:
 
-    def __init__(self , SensorModelParams):
+    def __init__(self , SensorModelParams , mapper = None):
         self.laser_max_range = SensorModelParams['laser_max_range']
         self.laser_min_range = SensorModelParams['laser_min_range']
         self.z_hit = SensorModelParams['z_hit']
@@ -14,9 +14,14 @@ class SensorModel:
         self.z_rand = SensorModelParams['z_rand']
         self.sigma_hit = SensorModelParams['sigma_hit']
         self.lambda_short = SensorModelParams['lambda_short']
-        self.mapper = Mapper(RearLaserTransformMatrix= RLTM,
-                             FrontLaserTransformMatrix= FLTM,
-                             mapMetaData= mapMetaData)
+        self.start_angle = SensorModelParams['start_angle']
+        self.angle_increment = SensorModelParams['angle_increment']
+        if mapper is None:
+            self.mapper = Mapper(RearLaserTransformMatrix= RLTM,
+                                 FrontLaserTransformMatrix= FLTM,
+                                 mapMetaData= mapMetaData)
+        else:
+            self.mapper = mapper
     
     def _p_hit(self, z, z_t):
         '''
@@ -72,31 +77,33 @@ class SensorModel:
 
         return factors.T @ probs
 
-    def _expected_measurement(self, x_t, i , is_front_laser = True):
+    def _expected_measurement(self, x_t, i , actual , is_front_laser = True ):
         '''
         x_t: pose of the robot
         i: ray index
         '''
         # computes the expected measurement wrt the robot pose 
         # in the odom frame according to the map constructed so far
+        ray_angle = self. start_angle + i * self.angle_increment
         if is_front_laser:
-            z_t = self.mapper.ray_casting(x_t, i , self.laser_max_range , FLTM)
+            z_t = self.mapper.ray_casting(x_t, ray_angle , actual , FLTM)
         else:
-            z_t = self.mapper.ray_casting(x_t, i  , self.laser_max_range , RLTM)
+            z_t = self.mapper.ray_casting(x_t, ray_angle , self.laser_max_range , RLTM)
         return z_t
 
     def p_z_given_x_m(self, z, x_t , is_front_laser = True):
         '''
         z: rays from Sensor
         z_t: Expected measurement based on robot pose and map
-        x_t: pose of the robot
+        x_t: pose of the robot in the odom frame
         '''
-        q = 1
+        q = 0
         for i in range(len(z)):
             # compute the expected measurement
-            z_t = self._expected_measurement(x_t, i , is_front_laser)
-            print("expected: " , z_t , "  actual: " , z[i])
-            q *= self._p_z(z[i], z_t)
+            if z[i] != "inf" and z[i] > self.laser_min_range and z[i] < self.laser_max_range:
+                z_t = self._expected_measurement(x_t, i , z[i] , is_front_laser)
+                print("expected: " , z_t , "  actual: " , z[i])
+                q += self._p_z(z[i], z_t)
         return q
 
 

@@ -68,3 +68,5 @@ SensorModelParams['sigma_hit'] = 0.1
 SensorModelParams['lambda_short'] = 0.1
 SensorModelParams['laser_max_range'] = 30
 SensorModelParams['laser_min_range'] = 0.1
+SensorModelParams['start_angle'] = -2.3561999797821045
+SensorModelParams['angle_increment'] = 0.008726666681468487

@@ -5,6 +5,7 @@ from utils import Transformation
 import rospy
 
 
+
 class MapPublisher(Mapper):
     def __init__(self, publishTopic, RearLaserTransformMatrix, FrontLaserTransformMatrix, \
         mapMetaData, referenceFrame,sensorTopic):
@@ -28,6 +29,7 @@ class MapPublisher(Mapper):
         #call the super class constructor
         super().__init__(RearLaserTransformMatrix, FrontLaserTransformMatrix ,mapMetaData)
         
+
     def _onDataRecived(self,msg):
         map = OccupancyGrid()
         map.header.frame_id = self.referenceFrame

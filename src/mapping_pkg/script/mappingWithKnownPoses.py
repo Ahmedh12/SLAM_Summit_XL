@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
-from utils import Transformation
+from utils import Transformation , normalize_angle
 import math
 
 
@@ -44,6 +44,7 @@ class Mapper:
             x,y = self.getGlobalCoords(x,y,transform)
         else:
             x,y = self.getGlobalCoords(x,y,transform,toOdomTransform)
+            
         offset_x = self.mapMetaData.origin.position.x
         offset_y = self.mapMetaData.origin.position.y
         resolution = self.mapMetaData.resolution
@@ -73,20 +74,22 @@ class Mapper:
                 x,y = self.getRayCoords(ranges[i],ray_angle,transform)
                 #Mark the cell as occupied
                 if self.inMap(x,y):
-                        if self.cells[x,y] == -1:
-                            self.cells[x,y] = (0.9/0.1)*10
-                        else:
-                            self.cells[x,y] = ((0.9/0.1)*(self.cells[x,y]/10))*10
+                    self.cells[x,y] = 100
+                        # if self.cells[x,y] == -1:
+                        #     self.cells[x,y] = (0.9/0.1)*10
+                        # else:
+                        #     self.cells[x,y] = ((0.9/0.1)*(self.cells[x,y]/10))*10
                 
                 #Mark the cells that are in the sensor range as free if not occupied
                 step_size = ranges[i] * self.mapMetaData.resolution
                 for j in range(int(1/self.mapMetaData.resolution)-1):
                     x,y = self.getRayCoords(step_size*j,ray_angle,transform)
                     if self.inMap(x,y):
-                        if self.cells[x,y] == -1:
-                            self.cells[x,y] = (0.1/0.9)*10
-                        else:
-                            self.cells[x,y] = ((0.1/0.9)*(self.cells[x,y]/10))*10
+                        self.cells[x,y] = max(0,self.cells[x,y])
+                        # if self.cells[x,y] == -1:
+                        #     self.cells[x,y] = (0.1/0.9)*10
+                        # else:
+                        #     self.cells[x,y] = ((0.1/0.9)*(self.cells[x,y]/10))*10
         
     def computeOccupancy(self,SensorReading):
         self.followRays(SensorReading.ranges_front,
@@ -103,25 +106,37 @@ class Mapper:
                         SensorReading.angle_increment_rear, 
                         self.RLTM)
     
-    def ray_casting(self, x_t , rayIdx , max_range , transform):
+    def ray_casting(self, x_t , ray_angle , max_range , transform):
         '''
         Retrurns the length of the ray casted at the given pose and ray index
+        according to the map constructed so far
         x_t : the pose of the robot at time t in the odom frame
-        rayIdx : the index of the ray to be casted
+        ray_angle : the angle of the ray in its frame
         '''
         #Get the robot odom transformation matrix
         pos = [x_t.position.x,x_t.position.y,x_t.position.z]
         rot = [x_t.orientation.x,x_t.orientation.y, x_t.orientation.z,x_t.orientation.w]
-        RT = Transformation(parentFrame="" , childFrame="" , pos = pos , rot= rot).transformationMatrix()
+        RT = Transformation(parentFrame="" , 
+                            childFrame="" , 
+                            pos = pos , rot= rot).transformationMatrix()
+        
+        ray_angle = normalize_angle(ray_angle)
+
         #cast the ray
         step_size = max_range * self.mapMetaData.resolution
         for j in range(int(1/self.mapMetaData.resolution)):
-            x,y = self.getRayCoords(step_size*j,rayIdx,transform,RT)
-            if self.inMap(x,y) and self.cells[x,y] >= 60:
+            x,y = self.getRayCoords(step_size*j,ray_angle,transform,RT)
+            y_map = int((x_t.position.x - self.mapMetaData.origin.position.x) / self.mapMetaData.resolution)
+            x_map = int((x_t.position.y - self.mapMetaData.origin.position.y) / self.mapMetaData.resolution)
+
+            if self.inMap(x,y) and self.cells[x,y] == 100:
+                print("hit")
+                print("pose in map",str(x_map),str(y_map),sep=",")
+                print("grid",str(x),str(y) , sep=",")
                 break
-            
+
         #Compute the length of the ray                
-        ray_length = math.sqrt((x-x_t.position.x)**2 + (y-x_t.position.y)**2)
+        ray_length = math.sqrt((x-x_map)**2 + (y-y_map)**2)
         
-        return ray_length
+        return ray_length * self.mapMetaData.resolution
 

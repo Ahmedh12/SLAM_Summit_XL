@@ -8,15 +8,24 @@ from constants import mapMetaData , RLTM , FLTM
 from sensorModel import SensorModel
 from constants import SensorModelParams
 from mapping_pkg.msg import Readings
-import numpy as np
+
 
 def tempCallback(msg):
     global sensorModel
-    print(sensorModel.p_z_given_x_m(msg.ranges_front,msg.pose.pose,is_front_laser=True))
+    pose = msg.pose.pose
+    # pose.position.x = 0
+    # pose.position.y = 0
+    # pose.position.z = 0
+    # pose.orientation.x = 0
+    # pose.orientation.y = 0
+    # pose.orientation.z = 0
+    # pose.orientation.w = 1
+
+    print(sensorModel.p_z_given_x_m(msg.ranges_front,pose,is_front_laser=True))
 
 
 def main():
-    MapPublisher(publishTopic= "map_data",
+    mapper = MapPublisher(publishTopic= "map_data",
             RearLaserTransformMatrix= RLTM,
             FrontLaserTransformMatrix= FLTM,
             mapMetaData= mapMetaData,
@@ -25,7 +34,7 @@ def main():
     
     #to be deleted
     global sensorModel
-    sensorModel = SensorModel(SensorModelParams= SensorModelParams)
+    sensorModel = SensorModel(SensorModelParams= SensorModelParams , mapper = mapper)
     rospy.Subscriber(name = "/sensor_readings" ,
                         data_class= Readings ,  
                         callback= tempCallback ,
