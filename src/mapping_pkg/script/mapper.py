@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import numpy as np
-from utils import Transformation , normalize_angle
+from utils import Transformation , normalize_angle , get_quaternion_from_euler
 import math
-
-
+from geometry_msgs.msg import Pose
+from nav_msgs.msg import OccupancyGrid
 
 '''
 Assumptions:
@@ -25,6 +25,7 @@ class Mapper:
         self.FLTM = FrontLaserTransformMatrix
         self.RLTM = RearLaserTransformMatrix
         self.mapMetaData = mapMetaData
+        self.RT = np.eye(4)
 
     def getGlobalCoords(self,x,y,transform , toOdomTransform = None):
         temp = np.array([x,y,1,1])
@@ -141,17 +142,39 @@ class Mapper:
         
         return ray_length * self.mapMetaData.resolution
 
-
     def generateRandomPose(self):
         '''
         Generates a random pose in the map
         '''
-        #Generate a random pose in the map
-        x_lower = self.mapMetaData.origin.position.x / self.mapMetaData.resolution
-        x_upper = (self.mapMetaData.origin.position.x / self.mapMetaData.resolution)  + self.mapMetaData.width
-        y_lower = self.mapMetaData.origin.position.y / self.mapMetaData.resolution
-        y_upper = (self.mapMetaData.origin.position.y / self.mapMetaData.resolution)  + self.mapMetaData.height
-        x = np.random.uniform(x_lower,x_upper)
-        y = np.random.uniform(y_lower,y_upper)
+        x_lower = self.mapMetaData.origin.position.x
+        x_upper = (self.mapMetaData.origin.position.x)  + self.mapMetaData.width * self.mapMetaData.resolution
+        y_lower = self.mapMetaData.origin.position.y
+        y_upper = (self.mapMetaData.origin.position.y)  + self.mapMetaData.height * self.mapMetaData.resolution
+        x = np.random.uniform(x_lower/5,x_upper/5)
+        y = np.random.uniform(y_lower/5,y_upper/5)
         theta = np.random.uniform(-math.pi,math.pi)
-        return x,y,theta
+
+        pose = Pose()
+        pose.position.x = x
+        pose.position.y = y
+        pose.position.z = 0
+        qx,qy,qz,qw = get_quaternion_from_euler(0,0,theta)
+        pose.orientation.x = qx
+        pose.orientation.y = qy
+        pose.orientation.z = qz
+        pose.orientation.w = qw
+        
+
+        return pose
+
+    def onDataRecived(self,pose,msg):
+        map = OccupancyGrid()
+        map.header.frame_id = self.referenceFrame
+        map.info = self.mapMetaData
+        robot_odom = pose
+        pos = [robot_odom.position.x,robot_odom.position.y,robot_odom.position.z]
+        rot = [robot_odom.orientation.x,robot_odom.orientation.y, robot_odom.orientation.z,robot_odom.orientation.w]
+        self.RT = Transformation(parentFrame="" , childFrame="" , pos = pos , rot= rot).transformationMatrix() 
+        self.computeOccupancy(msg)
+        map.data = tuple(self.cells.flatten())
+        return map

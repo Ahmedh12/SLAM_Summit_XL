@@ -1,6 +1,7 @@
-from math import atan2, cos, sin, sqrt, pi
-from utils import normalize_angle
-from utils import sample
+from math import atan2, cos, sin, sqrt
+from utils import normalize_angle , z_quat_to_euler
+from utils import sample , get_quaternion_from_euler
+from geometry_msgs.msg import Pose
 import numpy as np
 
 class OdometryMotionModel:
@@ -18,9 +19,9 @@ class OdometryMotionModel:
         :param curr_odom_pose: current odometry pose
         :param prev_pose: previous pose
         '''
-        x_new, y_new, theta_new = curr_odom_pose
-        x, y, theta = prev_odom_pose
-        x_t_1, y_t_1, theta_t_1 = prev_pose
+        x_new, y_new, theta_new = curr_odom_pose.position.x, curr_odom_pose.position.y,z_quat_to_euler(curr_odom_pose)
+        x, y, theta = prev_odom_pose.position.x, prev_odom_pose.position.y,z_quat_to_euler(prev_odom_pose)
+        x_t_1, y_t_1, theta_t_1 = prev_pose.position.x, prev_pose.position.y,z_quat_to_euler(prev_pose)
 
         delta_rot1 = atan2(y_new - y, x_new - x) - theta
         delta_trans = sqrt((x_new - x)**2 + (y_new - y)**2)
@@ -46,9 +47,16 @@ class OdometryMotionModel:
         theta_dash = theta_t_1 + delta_rot1_hat + delta_rot2_hat
         
         theta_dash = normalize_angle(theta_dash)
-
-        x_t = np.array([x_dash, y_dash, theta_dash])
-
+        x_t = Pose()
+        x_t.position.x = x_dash
+        x_t.position.y = y_dash
+        x_t.position.z = 0
+        qx,qy,qz,qw = get_quaternion_from_euler(0,0,theta)
+        x_t.orientation.x = qx
+        x_t.orientation.y = qy
+        x_t.orientation.z = qz
+        x_t.orientation.w = qw
+    
         #print("Curr_pose: ", str(self.prev_pose) ," Sampled_pose: ", str(x_t) , "\npre_odom_pose: ", \
         #    str(self.pre_odom_pose) , " curr_odom_pose: ", str(curr_odom_pose) , "\n")
         return x_t

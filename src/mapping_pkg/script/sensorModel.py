@@ -91,12 +91,14 @@ class SensorModel:
             z_t = self.mapper.ray_casting(x_t, ray_angle , self.laser_max_range , RLTM)
         return z_t
 
-    def p_z_given_x_m(self, z, x_t , is_front_laser = True):
+    def p_z_given_x_m(self, z, x_t , mapper ,is_front_laser = True):
         '''
         z: rays from Sensor
         z_t: Expected measurement based on robot pose and map
         x_t: pose of the robot in the odom frame
+        mapper: map constructed so far
         '''
+        self.mapper = mapper
         q = 0
         for i in range(len(z)):
             # compute the expected measurement
