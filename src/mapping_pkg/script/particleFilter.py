@@ -48,11 +48,8 @@ class particleFilter:
             frontScannerCorrection = self.sensorModel.p_z_given_x_m(laserScanFront, self.particles[i].pose  , self.particles[i].mapper)
             rearScannerCorrection = self.sensorModel.p_z_given_x_m(laserScanRear, self.particles[i].pose  , self.particles[i].mapper , False)
             self.particles[i].updateWeight(frontScannerCorrection + rearScannerCorrection)
-            
-            #In The end of the loop we will have the best pose , 
-            # so we will compute the map for the best pose
-            # only to reduce the computation time
-            # self.particles[i].mapper.computeOccupancy(msg)
+
+            self.particles[i].mapper.computeOccupancy(msg)
 
             accum += self.particles[i].weight
             self.weights[i] = self.particles[i].weight
