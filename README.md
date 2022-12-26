@@ -57,6 +57,10 @@
 ### partially Generated Map 
 ![Our Map](imgs/ourMap.png)
 
+
+### Comments
+Map Visualization with high noise odometry parameters is not clear, due to different particle maps overlapping
+
 ## Contributors
 
 - [Ahmed Hussien](https://www.github.com/Ahmedh12)
