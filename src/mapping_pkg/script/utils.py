@@ -35,11 +35,13 @@ def sample(mean, cov,type = 'gaussian', state = 'univariate'):
         elif type == 'triangular':
                 return np.random.triangular(mean, cov)
 
+#normalize angle to [-pi, pi]
 def normalize_angle(angle):
-    angle = angle % (2 * np.pi)
-    if angle > np.pi:
-        angle -= 2 * np.pi
-    return angle 
+        while angle > np.pi:
+                angle -= 2 * np.pi
+        while angle < -np.pi:
+                angle += 2 * np.pi
+        return angle
 
 
 def z_quat_to_euler(pose):

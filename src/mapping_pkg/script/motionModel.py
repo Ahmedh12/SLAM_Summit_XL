@@ -48,25 +48,23 @@ class MotionModel:
                                             type= 'gaussian' ,
                                             state= 'univariate')
         
-        x_dash = x_t_1 + delta_trans_hat * cos(theta + delta_rot1_hat)
-        y_dash = y_t_1 + delta_trans_hat * sin(theta + delta_rot1_hat)
+        # theta_norm = normalize_angle(theta + delta_rot1_hat)
+        theta_norm = theta + delta_rot1_hat
+
+        x_dash = x_t_1 + delta_trans_hat * cos(theta_norm)
+        y_dash = y_t_1 + delta_trans_hat * sin(theta_norm)
         theta_dash = theta_t_1 + delta_rot1_hat + delta_rot2_hat
         
-        theta_dash = normalize_angle(theta_dash)
+        # theta_dash = normalize_angle(theta_dash)
         x_t = Pose()
         x_t.position.x = x_dash 
         x_t.position.y = y_dash 
         x_t.position.z = 0
-        qx,qy,qz,qw = get_quaternion_from_euler(0,0,theta)
+        qx,qy,qz,qw = get_quaternion_from_euler(0,0,theta_dash)
         x_t.orientation.x = qx
         x_t.orientation.y = qy
         x_t.orientation.z = qz
         x_t.orientation.w = qw
-        
-        #print("Curr_pose: ", str(self.prev_pose) ," Sampled_pose: ", str(x_t) , "\npre_odom_pose: ", \
-        #    str(self.pre_odom_pose) , " curr_odom_pose: ", str(curr_odom_pose) , "\n")
-
-        # x_t = curr_odom_pose
 
         return x_t
 
