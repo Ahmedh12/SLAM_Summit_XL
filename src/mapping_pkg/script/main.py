@@ -9,7 +9,7 @@ from constants import SensorModelParams , motionNoise
 def FastSLAM():
     rospy.init_node('FastSLAM', anonymous=True)
     rate = rospy.Rate(10) # 10hz
-    n_particles = 10
+    n_particles = 2
     motionModel = OdometryMotionModel(motionNoise)
     sensorModel = SensorModel(SensorModelParams)
     pf = particleFilter(n_particles , motionModel , sensorModel)
@@ -17,15 +17,13 @@ def FastSLAM():
         msg = rospy.wait_for_message("/sensor_readings" , Readings)
         if pf.particles == []:
             pf.initParticles(msg)
-            pose = msg.pose.pose
         else:
             print("update particles")
             pf.updateParticles(msg)
             print("resample particles")
             pf.resampleParticles()
-            pose = pf.pose
         print("publish map")
-        pf.mapPublisher.onDataRecived(pose,msg)
+        pf.mapPublisher.onDataRecived(pf.map)
         rate.sleep()
 
 def main():

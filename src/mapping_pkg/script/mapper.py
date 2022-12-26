@@ -18,13 +18,16 @@ Observations:
 '''
 
 class Mapper:
-    def __init__(self  ,RearLaserTransformMatrix , FrontLaserTransformMatrix , mapMetaData):
+    def __init__(self  ,RearLaserTransformMatrix , FrontLaserTransformMatrix , mapMetaData , referenceFrame):
 
         self.cells = np.ones((mapMetaData.height,mapMetaData.width),dtype=np.int8)
         self.cells = self.cells * -1 # -1 means unknown, 0 means free, 100 means occupied
         self.FLTM = FrontLaserTransformMatrix
         self.RLTM = RearLaserTransformMatrix
         self.mapMetaData = mapMetaData
+        self.referenceFrame = referenceFrame
+        self.map = None
+
         self.RT = np.eye(4)
 
     def getGlobalCoords(self,x,y,transform , toOdomTransform = None):
@@ -144,15 +147,15 @@ class Mapper:
 
     def generateRandomPose(self):
         '''
-        Generates a random pose in the map
+        Generates a random pose in the map around the robot odometry pose
         '''
         x_lower = self.mapMetaData.origin.position.x
         x_upper = (self.mapMetaData.origin.position.x)  + self.mapMetaData.width * self.mapMetaData.resolution
         y_lower = self.mapMetaData.origin.position.y
         y_upper = (self.mapMetaData.origin.position.y)  + self.mapMetaData.height * self.mapMetaData.resolution
-        x = np.random.uniform(x_lower/5,x_upper/5)
-        y = np.random.uniform(y_lower/5,y_upper/5)
-        theta = np.random.uniform(-math.pi,math.pi)
+        x = np.random.uniform(x_lower+49.5,x_upper-49.5)
+        y = np.random.uniform(y_lower+49.5,y_upper-49.5)
+        theta = np.random.uniform(0,2*math.pi - 6.28)
 
         pose = Pose()
         pose.position.x = x
@@ -177,4 +180,5 @@ class Mapper:
         self.RT = Transformation(parentFrame="" , childFrame="" , pos = pos , rot= rot).transformationMatrix() 
         self.computeOccupancy(msg)
         map.data = tuple(self.cells.flatten())
+        self.map = map
         return map

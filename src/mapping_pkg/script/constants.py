@@ -54,17 +54,17 @@ FLTM = BaseLinkToBaseFrame.transformationMatrix() @ FrontLaser[1].transformation
 
 #motion Noise parameters
 motionNoise = {}
-motionNoise['alpha1'] = 0.01
-motionNoise['alpha2'] = 0.01
-motionNoise['alpha3'] = 0.001
-motionNoise['alpha4'] = 0.001
+motionNoise['alpha1'] = 1e-3
+motionNoise['alpha2'] = 1e-3
+motionNoise['alpha3'] = 1e-4
+motionNoise['alpha4'] = 1e-4
 
 #Sensor Model parameters
 SensorModelParams = {}
-SensorModelParams['z_hit'] = 0.85
-SensorModelParams['z_short'] = 0.025
-SensorModelParams['z_max'] = 0.025
-SensorModelParams['z_rand'] = 0.1
+SensorModelParams['z_hit'] = 0.99
+SensorModelParams['z_short'] = 5e-3
+SensorModelParams['z_max'] = 25e-4
+SensorModelParams['z_rand'] = 25e-4
 SensorModelParams['sigma_hit'] = 0.1
 SensorModelParams['lambda_short'] = 0.1
 SensorModelParams['laser_max_range'] = 30

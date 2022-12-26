@@ -19,7 +19,8 @@ class SensorModel:
         if mapper is None:
             self.mapper = Mapper(RearLaserTransformMatrix= RLTM,
                                  FrontLaserTransformMatrix= FLTM,
-                                 mapMetaData= mapMetaData)
+                                 mapMetaData= mapMetaData,
+                                 referenceFrame= 'robot_map')
         else:
             self.mapper = mapper
     

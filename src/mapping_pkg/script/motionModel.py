@@ -56,9 +56,12 @@ class OdometryMotionModel:
         x_t.orientation.y = qy
         x_t.orientation.z = qz
         x_t.orientation.w = qw
-    
+        
         #print("Curr_pose: ", str(self.prev_pose) ," Sampled_pose: ", str(x_t) , "\npre_odom_pose: ", \
         #    str(self.pre_odom_pose) , " curr_odom_pose: ", str(curr_odom_pose) , "\n")
+
+        # x_t = curr_odom_pose
+
         return x_t
 
     
