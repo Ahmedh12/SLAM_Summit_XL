@@ -53,11 +53,19 @@ RLTM = BaseLinkToBaseFrame.transformationMatrix() @ RearLaser[1].transformationM
 FLTM = BaseLinkToBaseFrame.transformationMatrix() @ FrontLaser[1].transformationMatrix() @ FrontLaser[0].transformationMatrix()
 
 #motion Noise parameters
-motionNoise = {}
-motionNoise['alpha1'] = 1e-3
-motionNoise['alpha2'] = 1e-3
-motionNoise['alpha3'] = 1e-4
-motionNoise['alpha4'] = 1e-4
+motionNoiseOdom = {}
+motionNoiseOdom['alpha1'] = 0 #1e-3
+motionNoiseOdom['alpha2'] = 0 #1e-3
+motionNoiseOdom['alpha3'] = 0 #1e-4
+motionNoiseOdom['alpha4'] = 0 #1e-4
+
+motionNoiseVelocity = {}
+motionNoiseVelocity['alpha1'] = 1e-3
+motionNoiseVelocity['alpha2'] = 1e-3
+motionNoiseVelocity['alpha3'] = 1e-4
+motionNoiseVelocity['alpha4'] = 1e-4
+motionNoiseVelocity['alpha5'] = 0.1
+motionNoiseVelocity['alpha6'] = 0.1
 
 #Sensor Model parameters
 SensorModelParams = {}

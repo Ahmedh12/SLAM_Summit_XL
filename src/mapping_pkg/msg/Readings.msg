@@ -8,4 +8,4 @@ float32[] ranges_front
 float32[] ranges_rear
 Header  header
 geometry_msgs/PoseWithCovariance pose              #The pose of the robot e.g. position:[x,y,theta] , orientation: in quaternion domain 
-
+geometry_msgs/TwistWithCovariance twist

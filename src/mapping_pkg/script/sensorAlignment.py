@@ -21,7 +21,7 @@ def OnDataRecieved(frontLaser,rearLaser,odometry):
 
     #Sensor Model Readings
     msg = Readings()
-    msg.header.frame_id = odometry.header.frame_id
+    msg.header = odometry.header
 
     msg.start_angle_front = frontLaser.angle_min
     msg.start_angle_rear = rearLaser.angle_min + (0*rearLaser.angle_increment)
@@ -37,6 +37,7 @@ def OnDataRecieved(frontLaser,rearLaser,odometry):
 
     #Motion Model Readings:
     msg.pose = odometry.pose
+    msg.twist = odometry.twist
     end_time = rospy.Time.now()
 
     global start_time , pub

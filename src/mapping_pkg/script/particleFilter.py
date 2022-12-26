@@ -1,6 +1,5 @@
 from mapper import Mapper
 import numpy as np
-
 from constants import mapMetaData , RLTM , FLTM
 from mapPublisher import MapPublisher
 
@@ -13,6 +12,7 @@ class particleFilter:
         self.particles = []
         self.weights = []
         self.pose = None
+        self.maxWeight = 0
         self.map = None
         self.mapPublisher =  MapPublisher(publishTopic = "map_data",
                     RearLaserTransformMatrix = RLTM,
@@ -24,9 +24,9 @@ class particleFilter:
     def initParticles(self , msg):
         for _ in range(self.n_particles):
             mapper = Mapper(RLTM, FLTM , mapMetaData , "robot_map")
-            pose = mapper.generateRandomPose()
-            weight = 1 / self.n_particles
             curr_odom_pose = msg.pose.pose
+            pose = curr_odom_pose #mapper.generateRandomPose()
+            weight = 1 / self.n_particles
             self.particles.append(particle(pose , weight , mapper , curr_odom_pose))
             self.weights.append(weight)
         
@@ -49,8 +49,10 @@ class particleFilter:
             print(self.particles[i].pose , self.particles[i].weight , sep=",")
             prev_pose = self.particles[i].pose
             curr_odom_pose = odom
-            prev_odom_pose = self.particles[i].prev_odom_pose
-            self.particles[i].updatePose(self.motionModel.SampleMotionModel(prev_odom_pose , curr_odom_pose , prev_pose))
+            prev_odom_pose = self.particles[i].curr_odom_pose
+
+            self.particles[i].updatePose(self.motionModel.sampleMotionModelOdom(prev_odom_pose , curr_odom_pose , prev_pose))
+            # self.particles[i].updatePose(self.motionModel.sampleMotionModelVelocity([msg.twist.twist.linear.x , msg.twist.twist.angular.z] , msg.header.stamp.secs , prev_pose))
             self.particles[i].updateOdom(odom)
             frontScannerCorrection = self.sensorModel.p_z_given_x_m(laserScanFront, self.particles[i].pose  , self.particles[i].mapper)
             rearScannerCorrection = self.sensorModel.p_z_given_x_m(laserScanRear, self.particles[i].pose  , self.particles[i].mapper , False)
@@ -65,16 +67,14 @@ class particleFilter:
         self.weights = [w / accum for w in self.weights]
 
         #select the best particle and update the map with it
-        self.pose = max(self.particles , key = lambda p : p.weight).pose
-        self.map = max(self.particles , key = lambda p : p.weight).mapper.map
+        bestParticle = max(self.particles , key = lambda p : p.weight)
+        self.maxWeight = bestParticle.weight
+        self.map = bestParticle.mapper.map
+        self.pose = bestParticle.pose
 
         #update all particles with the best map
         for i in range(self.n_particles):
             self.particles[i].mapper.map = self.map
-
-        # print("best pose: " , str(self.pose) , "weight: " , str(max(self.particles , key = lambda p : p.weight).weight))
-        #TODO:
-        # self.pose = self.particles[0].curr_odom_pose
 
 
     def resampleParticles(self):

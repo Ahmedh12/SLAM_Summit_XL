@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 import rospy
 from sensorModel import SensorModel
-from motionModel import OdometryMotionModel
+from motionModel import MotionModel
 from particleFilter import particleFilter
 from mapping_pkg.msg import Readings 
-from constants import SensorModelParams , motionNoise
+from constants import SensorModelParams , motionNoiseOdom , motionNoiseVelocity 
 
 def FastSLAM():
     rospy.init_node('FastSLAM', anonymous=True)
     rate = rospy.Rate(10) # 10hz
     n_particles = 2
-    motionModel = OdometryMotionModel(motionNoise)
+    motionModel = MotionModel(motionNoiseOdom , motionNoiseVelocity)
     sensorModel = SensorModel(SensorModelParams)
     pf = particleFilter(n_particles , motionModel , sensorModel)
     while not rospy.is_shutdown():
