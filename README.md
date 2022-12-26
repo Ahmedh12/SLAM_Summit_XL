@@ -1,6 +1,6 @@
 # CMPN462 Cognitive Robotics Term Project
 
-## Run
+## How to Run the Project
 - first Run Gazebo and Rviz
 ```bash
     roslaunch summit_xl_sim_bringup summit_xls_complete.launch
