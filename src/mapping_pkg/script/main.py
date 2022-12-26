@@ -4,14 +4,14 @@ from sensorModel import SensorModel
 from motionModel import MotionModel
 from particleFilter import particleFilter
 from mapping_pkg.msg import Readings 
-from constants import SensorModelParams , motionNoiseOdom , motionNoiseVelocity 
+from constants import SENSOR_MODEL_PARAMS , MOTION_NOISE_ODOM , MOTION_NOISE_VELOCITY 
 
 def FastSLAM():
     rospy.init_node('FastSLAM', anonymous=True)
     rate = rospy.Rate(10) # 10hz
     n_particles = 2
-    motionModel = MotionModel(motionNoiseOdom , motionNoiseVelocity)
-    sensorModel = SensorModel(SensorModelParams)
+    motionModel = MotionModel(MOTION_NOISE_ODOM , MOTION_NOISE_VELOCITY)
+    sensorModel = SensorModel(SENSOR_MODEL_PARAMS)
     pf = particleFilter(n_particles , motionModel , sensorModel)
     while not rospy.is_shutdown():
         msg = rospy.wait_for_message("/sensor_readings" , Readings)

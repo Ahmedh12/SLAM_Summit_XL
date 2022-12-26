@@ -1,7 +1,7 @@
 import numpy as np
 from math import atan2, cos, sin, sqrt, pi
 from mapper import Mapper
-from constants import RLTM , FLTM , mapMetaData
+from constants import RLTM , FLTM , MAP_META_DATA
 
 class SensorModel:
 
@@ -19,7 +19,7 @@ class SensorModel:
         if mapper is None:
             self.mapper = Mapper(RearLaserTransformMatrix= RLTM,
                                  FrontLaserTransformMatrix= FLTM,
-                                 mapMetaData= mapMetaData,
+                                 mapMetaData= MAP_META_DATA,
                                  referenceFrame= 'robot_map')
         else:
             self.mapper = mapper

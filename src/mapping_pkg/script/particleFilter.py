@@ -1,6 +1,6 @@
 from mapper import Mapper
 import numpy as np
-from constants import mapMetaData , RLTM , FLTM
+from constants import MAP_META_DATA , RLTM , FLTM , REFERENCE_FRAME
 from mapPublisher import MapPublisher
 
 
@@ -17,13 +17,13 @@ class particleFilter:
         self.mapPublisher =  MapPublisher(publishTopic = "map_data",
                     RearLaserTransformMatrix = RLTM,
                     FrontLaserTransformMatrix = FLTM,
-                    mapMetaData = mapMetaData,
-                    referenceFrame = "robot_map")
+                    mapMetaData = MAP_META_DATA,
+                    referenceFrame = REFERENCE_FRAME)
 
 
     def initParticles(self , msg):
         for _ in range(self.n_particles):
-            mapper = Mapper(RLTM, FLTM , mapMetaData , "robot_map")
+            mapper = Mapper(RLTM, FLTM , MAP_META_DATA , REFERENCE_FRAME)
             curr_odom_pose = msg.pose.pose
             pose = curr_odom_pose #mapper.generateRandomPose()
             weight = 1 / self.n_particles

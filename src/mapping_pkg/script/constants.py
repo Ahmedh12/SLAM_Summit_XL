@@ -1,18 +1,21 @@
 from nav_msgs.msg import MapMetaData
 from utils import Transformation
 
+#Reference Frame
+REFERENCE_FRAME = "robot_map"
+
 #Map MetaData
-mapMetaData = MapMetaData()
-mapMetaData.resolution = 0.02
-mapMetaData.width = 4992
-mapMetaData.height = 4992
-mapMetaData.origin.position.x = -50
-mapMetaData.origin.position.y = -50
-mapMetaData.origin.position.z = 0
-mapMetaData.origin.orientation.x = 0
-mapMetaData.origin.orientation.y = 0
-mapMetaData.origin.orientation.z = 0
-mapMetaData.origin.orientation.w = 1
+MAP_META_DATA = MapMetaData()
+MAP_META_DATA.resolution = 0.02
+MAP_META_DATA.width = 4992
+MAP_META_DATA.height = 4992
+MAP_META_DATA.origin.position.x = -50
+MAP_META_DATA.origin.position.y = -50
+MAP_META_DATA.origin.position.z = 0
+MAP_META_DATA.origin.orientation.x = 0
+MAP_META_DATA.origin.orientation.y = 0
+MAP_META_DATA.origin.orientation.z = 0
+MAP_META_DATA.origin.orientation.w = 1
 
 #static Transformations --> The Values and Frame names are taken from the /tf_static topic
 # to log the topic run the following command in a terminal:
@@ -53,29 +56,29 @@ RLTM = BaseLinkToBaseFrame.transformationMatrix() @ RearLaser[1].transformationM
 FLTM = BaseLinkToBaseFrame.transformationMatrix() @ FrontLaser[1].transformationMatrix() @ FrontLaser[0].transformationMatrix()
 
 #motion Noise parameters
-motionNoiseOdom = {}
-motionNoiseOdom['alpha1'] = 0 # 1e-2
-motionNoiseOdom['alpha2'] = 0 # 1e-2
-motionNoiseOdom['alpha3'] = 0 # 1e-3
-motionNoiseOdom['alpha4'] = 0 # 1e-3
+MOTION_NOISE_ODOM = {}
+MOTION_NOISE_ODOM['alpha1'] = 0 # 1e-2
+MOTION_NOISE_ODOM['alpha2'] = 0 # 1e-2
+MOTION_NOISE_ODOM['alpha3'] = 0 # 1e-3
+MOTION_NOISE_ODOM['alpha4'] = 0 # 1e-3
 
-motionNoiseVelocity = {}
-motionNoiseVelocity['alpha1'] = 1e-3
-motionNoiseVelocity['alpha2'] = 1e-3
-motionNoiseVelocity['alpha3'] = 1e-4
-motionNoiseVelocity['alpha4'] = 1e-4
-motionNoiseVelocity['alpha5'] = 0.1
-motionNoiseVelocity['alpha6'] = 0.1
+MOTION_NOISE_VELOCITY = {}
+MOTION_NOISE_VELOCITY['alpha1'] = 1e-3
+MOTION_NOISE_VELOCITY['alpha2'] = 1e-3
+MOTION_NOISE_VELOCITY['alpha3'] = 1e-4
+MOTION_NOISE_VELOCITY['alpha4'] = 1e-4
+MOTION_NOISE_VELOCITY['alpha5'] = 0.1
+MOTION_NOISE_VELOCITY['alpha6'] = 0.1
 
 #Sensor Model parameters
-SensorModelParams = {}
-SensorModelParams['z_hit'] = 0.99
-SensorModelParams['z_short'] = 5e-3
-SensorModelParams['z_max'] = 25e-4
-SensorModelParams['z_rand'] = 25e-4
-SensorModelParams['sigma_hit'] = 0.1
-SensorModelParams['lambda_short'] = 0.1
-SensorModelParams['laser_max_range'] = 30
-SensorModelParams['laser_min_range'] = 0.1
-SensorModelParams['start_angle'] = -2.3561999797821045
-SensorModelParams['angle_increment'] = 0.008726666681468487
+SENSOR_MODEL_PARAMS = {}
+SENSOR_MODEL_PARAMS['z_hit'] = 0.99
+SENSOR_MODEL_PARAMS['z_short'] = 5e-3
+SENSOR_MODEL_PARAMS['z_max'] = 25e-4
+SENSOR_MODEL_PARAMS['z_rand'] = 25e-4
+SENSOR_MODEL_PARAMS['sigma_hit'] = 0.1
+SENSOR_MODEL_PARAMS['lambda_short'] = 0.1
+SENSOR_MODEL_PARAMS['laser_max_range'] = 30
+SENSOR_MODEL_PARAMS['laser_min_range'] = 0.1
+SENSOR_MODEL_PARAMS['start_angle'] = -2.3561999797821045
+SENSOR_MODEL_PARAMS['angle_increment'] = 0.008726666681468487
