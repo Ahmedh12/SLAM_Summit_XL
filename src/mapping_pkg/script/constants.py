@@ -57,10 +57,16 @@ FLTM = BaseLinkToBaseFrame.transformationMatrix() @ FrontLaser[1].transformation
 
 #motion Noise parameters
 MOTION_NOISE_ODOM = {}
-MOTION_NOISE_ODOM['alpha1'] = 0 # 1e-2
-MOTION_NOISE_ODOM['alpha2'] = 0 # 1e-2
-MOTION_NOISE_ODOM['alpha3'] = 0 # 1e-3
-MOTION_NOISE_ODOM['alpha4'] = 0 # 1e-3
+MOTION_NOISE_ODOM['alpha1'] =  0
+MOTION_NOISE_ODOM['alpha2'] =  0
+MOTION_NOISE_ODOM['alpha3'] =  0
+MOTION_NOISE_ODOM['alpha4'] =  0
+
+# MOTION_NOISE_ODOM = {}
+# MOTION_NOISE_ODOM['alpha1'] =  1e-3
+# MOTION_NOISE_ODOM['alpha2'] =  1e-3
+# MOTION_NOISE_ODOM['alpha3'] =  1e-3
+# MOTION_NOISE_ODOM['alpha4'] =  1e-3
 
 MOTION_NOISE_VELOCITY = {}
 MOTION_NOISE_VELOCITY['alpha1'] = 1e-3
