@@ -1,4 +1,4 @@
-# CMPN462 Cognitive Robotics Term Project
+# CMPN462 Cognitive Robotics Project
 
 ## How to Run the Project
 - first Run Gazebo and Rviz
