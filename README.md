@@ -1,4 +1,4 @@
-# CMPN462 Cognitive Robotics Project
+# Cognitive Robotics SLAM 1.0
 
 ## How to Run the Project
 - first Run Gazebo and Rviz
